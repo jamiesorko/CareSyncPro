@@ -31,7 +31,7 @@ const App: React.FC = () => {
       activeTab={activeTab} 
       setActiveTab={setActiveTab}
       activeRole={user.role}
-      setActiveRole={(role) => setUser({ ...user, role })}
+      setActiveRole={(role: CareRole) => setUser({ ...user, role })}
       staffName={user.name}
       language="English"
       company={company}
