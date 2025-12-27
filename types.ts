@@ -161,7 +161,8 @@ export interface BillingAlert { id: string; staffName: string; clientName: strin
 export interface FormRequirement { id: string; name: string; submissionTarget: string; isMandatory: boolean; }
 export interface Applicant { id: string; companyId: string; name: string; role: CareRole; credentialsVerified: boolean; referencesChecked: boolean; cultureFitScore: number; status: 'PENDING' | 'INTERVIEW_SET' | 'HIRED' | 'REJECTED'; appliedDate: string; }
 export interface Certificate { id: string; companyId: string; staffId: string; staffName: string; type: string; expiryDate: string; status: 'WARNING' | 'EXPIRED' | 'VALID'; }
-export interface TrainingRecord { id: string; companyId: string; staffId: string; staffName: string; moduleName: string; isMandatory: boolean; LoveIsCompleted: boolean; isCompleted: boolean; dueDate: string; }
+/* Removed 'LoveIsCompleted' typo from TrainingRecord to fix required property errors */
+export interface TrainingRecord { id: string; companyId: string; staffId: string; staffName: string; moduleName: string; isMandatory: boolean; isCompleted: boolean; dueDate: string; }
 export interface LeaveRequest { id: string; companyId: string; staffId: string; staffName: string; type: string; option1: { start: string; end: string }; option2?: { start: string; end: string }; status: 'PENDING' | 'APPROVED' | 'REJECTED'; timestamp: string; }
 export interface Complaint { id: string; companyId: string; clientId: string; clientName: string; staffId: string; staffName: string; content: string; timestamp: string; status: 'NEW' | 'INVESTIGATING' | 'RESOLVED'; priority: 'LOW' | 'MED' | 'HIGH' | 'CRITICAL'; type: string; }
 export interface OncallShift { id: string; companyId: string; staffId: string; staffName: string; startTime: string; endTime: string; tier: 'PRIMARY' | 'SECONDARY'; }
