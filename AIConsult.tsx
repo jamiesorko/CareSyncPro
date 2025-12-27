@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenAI, Modality } from '@google/genai';
+import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { decode, encode, decodeAudioData } from '../utils/audioHelpers';
 import { CareRole } from '../types';
 import Translate from '../components/Translate';
@@ -66,15 +66,18 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputCtx.destination);
           },
-          onmessage: async (message) => {
-            if (message.serverContent?.outputTranscription) {
-              setTranscript(prev => [...prev.slice(-10), `[CORE]: ${message.serverContent.outputTranscription.text}`]);
+          onmessage: async (message: LiveServerMessage) => {
+            const content = message.serverContent;
+            if (!content) return;
+
+            if (content.outputTranscription) {
+              setTranscript(prev => [...prev.slice(-10), `[CORE]: ${content.outputTranscription?.text || ''}`]);
             }
-            if (message.serverContent?.inputTranscription) {
-              setTranscript(prev => [...prev.slice(-10), `[OPERATOR]: ${message.serverContent.inputTranscription.text}`]);
+            if (content.inputTranscription) {
+              setTranscript(prev => [...prev.slice(-10), `[OPERATOR]: ${content.inputTranscription?.text || ''}`]);
             }
 
-            const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            const base64Audio = content.modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputCtx.currentTime);
               const buffer = await decodeAudioData(decode(base64Audio), outputCtx, 24000, 1);
@@ -87,13 +90,16 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
               sourcesRef.current.add(source);
             }
 
-            if (message.serverContent?.interrupted) {
+            if (content.interrupted) {
               sourcesRef.current.forEach(s => s.stop());
               sourcesRef.current.clear();
               nextStartTimeRef.current = 0;
             }
           },
-          onerror: (e) => setStatus('Link Interrupted'),
+          onerror: (e) => {
+            console.error(e);
+            setStatus('Link Interrupted');
+          },
           onclose: () => setIsActive(false)
         },
         config: {
@@ -106,6 +112,7 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
 
       sessionRef.current = await sessionPromise;
     } catch (err) {
+      console.error(err);
       setStatus('Calibration Failure');
     }
   };
@@ -125,7 +132,7 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
           <button onClick={onClose} className="text-slate-500 font-bold hover:text-white transition-colors">✕</button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-6">
+        <div className="flex-1 overflow-y-auto p-10 space-y-6 scrollbar-hide">
           {transcript.map((line, i) => (
             <div key={i} className={`p-4 rounded-2xl text-[11px] font-medium border ${line.startsWith('[OPERATOR]') ? 'bg-sky-500/10 border-sky-500/20 text-sky-100 ml-12' : 'bg-white/5 border-white/10 text-slate-300 mr-12'}`}>
               {line}
@@ -135,7 +142,7 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
         </div>
 
         <div className="p-10 border-t border-white/5">
-          <button onClick={isActive ? stopSession : startSession} className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] transition-all ${isActive ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'bg-white text-black'}`}>
+          <button onClick={isActive ? stopSession : startSession} className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] transition-all ${isActive ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'bg-white text-black hover:scale-[1.01] active:scale-95'}`}>
             <Translate targetLanguage={language}>{isActive ? 'TERMINATE_SIGNAL' : 'OPEN_NEURAL_LINK'}</Translate>
           </button>
         </div>
