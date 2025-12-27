@@ -14,7 +14,6 @@ export class DBService {
   async getStaff() { return []; }
   async getClients() { return []; }
 
-  // Fix: Added missing updateCompanySettings method
   async updateCompanySettings(id: string, settings: Partial<Company>): Promise<void> {
     console.log(`[DB_SERVICE]: Updating settings for company ${id}`, settings);
   }
