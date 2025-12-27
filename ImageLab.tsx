@@ -8,13 +8,15 @@ const ImageLab: React.FC = () => {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Fix: Corrected handleGenerate to handle single image URL string return and update state correctly
   const handleGenerate = async () => {
     if (!prompt.trim() || loading) return;
     setLoading(true);
     try {
-      const urls = await geminiService.generateImage(prompt);
-      const newImages = urls.map(url => ({ url, prompt }));
-      setImages(prev => [...newImages, ...prev]);
+      const url = await geminiService.generateImage(prompt);
+      if (url) {
+        setImages(prev => [{ url, prompt }, ...prev]);
+      }
     } catch (err) {
       alert("Failed to generate image. Please try a different prompt.");
     } finally {
