@@ -2,6 +2,18 @@
 import { GoogleGenAI } from "@google/genai";
 import { Client, StaffMember } from "../types";
 
+/* Added AIStudio interface to resolve Window augmentation type conflict */
+interface AIStudio {
+  hasSelectedApiKey: () => Promise<boolean>;
+  openSelectKey: () => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    aistudio?: AIStudio;
+  }
+}
+
 export class GeminiService {
   private getAI() {
     return new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -74,13 +86,13 @@ export class GeminiService {
   }
 
   async generateVideo(prompt: string): Promise<string> {
-    const ai = this.getAI();
-    const aistudio = (window as any).aistudio;
-    
-    if (aistudio && !(await aistudio.hasSelectedApiKey())) {
-      await aistudio.openSelectKey();
+    /* Perform key selection check before creating AI instance to ensure the latest key is used */
+    if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) {
+      await window.aistudio.openSelectKey();
     }
 
+    const ai = this.getAI();
+    
     let operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
       prompt,
@@ -106,7 +118,6 @@ export class GeminiService {
   }
 
   async generateSecureSchedule(clients: any[], staff: any[]): Promise<any[]> {
-    const ai = this.getAI();
     return clients.map((c, i) => ({
       clientName: c.name,
       clientId: c.id,
