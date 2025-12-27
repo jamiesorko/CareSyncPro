@@ -67,17 +67,16 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
             scriptProcessor.connect(inputCtx.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            const content = message.serverContent;
-            if (!content) return;
+            if (!message.serverContent) return;
 
-            if (content.outputTranscription) {
-              setTranscript(prev => [...prev.slice(-10), `[CORE]: ${content.outputTranscription?.text || ''}`]);
+            if (message.serverContent.outputTranscription) {
+              setTranscript(prev => [...prev.slice(-10), `[CORE]: ${message.serverContent?.outputTranscription?.text || ''}`]);
             }
-            if (content.inputTranscription) {
-              setTranscript(prev => [...prev.slice(-10), `[OPERATOR]: ${content.inputTranscription?.text || ''}`]);
+            if (message.serverContent.inputTranscription) {
+              setTranscript(prev => [...prev.slice(-10), `[OPERATOR]: ${message.serverContent?.inputTranscription?.text || ''}`]);
             }
 
-            const modelTurn = content.modelTurn;
+            const modelTurn = message.serverContent.modelTurn;
             const base64Audio = modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputCtx.currentTime);
@@ -91,7 +90,7 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
               sourcesRef.current.add(source);
             }
 
-            if (content.interrupted) {
+            if (message.serverContent.interrupted) {
               sourcesRef.current.forEach(s => s.stop());
               sourcesRef.current.clear();
               nextStartTimeRef.current = 0;
