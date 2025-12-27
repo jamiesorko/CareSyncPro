@@ -64,7 +64,8 @@ export class GeminiService {
     });
     
     let imageUrl = "";
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
       if (part.inlineData) {
         imageUrl = `data:image/png;base64,${part.inlineData.data}`;
       }
@@ -95,7 +96,6 @@ export class GeminiService {
     return `${downloadLink}&key=${process.env.API_KEY}`;
   }
 
-  // Fix: Added missing strategic analysis method
   async getFinancialStrategy(context: any): Promise<string> {
     const ai = this.getAI();
     const response = await ai.models.generateContent({
@@ -105,7 +105,6 @@ export class GeminiService {
     return response.text || "Strategy unavailable.";
   }
 
-  // Fix: Added missing secure scheduling method
   async generateSecureSchedule(clients: any[], staff: any[]): Promise<any[]> {
     const ai = this.getAI();
     return clients.map((c, i) => ({
@@ -120,7 +119,6 @@ export class GeminiService {
     }));
   }
 
-  // Fix: Added missing clinical entity extraction method
   async extractClinicalInsights(transcript: string): Promise<any> {
     const ai = this.getAI();
     const response = await ai.models.generateContent({
@@ -135,7 +133,6 @@ export class GeminiService {
     }
   }
 
-  // Fix: Added missing market intelligence method
   async getMarketIntelligence(query: string): Promise<any> {
     const ai = this.getAI();
     return await ai.models.generateContent({
@@ -145,7 +142,6 @@ export class GeminiService {
     });
   }
 
-  // Fix: Added missing visual hazard analysis method
   async analyzeHazardImage(base64: string, prompt?: string): Promise<string> {
     const ai = this.getAI();
     const response = await ai.models.generateContent({
@@ -160,7 +156,6 @@ export class GeminiService {
     return response.text || "No hazard detected.";
   }
 
-  // Fix: Added missing self-repair logic audit method
   async runSelfRepairAudit(ledger: any): Promise<string> {
     const ai = this.getAI();
     const response = await ai.models.generateContent({
