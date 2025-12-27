@@ -77,7 +77,8 @@ const AIConsult: React.FC<Props> = ({ role, onClose, language }) => {
               setTranscript(prev => [...prev.slice(-10), `[OPERATOR]: ${content.inputTranscription?.text || ''}`]);
             }
 
-            const base64Audio = content.modelTurn?.parts?.[0]?.inlineData?.data;
+            const modelTurn = content.modelTurn;
+            const base64Audio = modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputCtx.currentTime);
               const buffer = await decodeAudioData(decode(base64Audio), outputCtx, 24000, 1);
