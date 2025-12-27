@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { OutbreakZone } from '../types';
 
@@ -25,7 +26,12 @@ export class BioSurveillanceService {
           responseMimeType: "application/json"
         }
       });
-      return JSON.parse(response.text || '[]');
+      const data = JSON.parse(response.text || '[]');
+      // Fix: Mapped ppe field from JSON to mandatoryPPE field expected by the OutbreakZone interface.
+      return data.map((d: any) => ({
+        ...d,
+        mandatoryPPE: d.ppe || []
+      }));
     } catch (e) {
       console.error(e);
       return [];
